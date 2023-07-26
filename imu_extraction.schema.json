@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://humanisingautonomy.com/schemas/imu_extraction.schema.json",
+  "title": "IMU Extraction",
+  "description": "The IMU data extracted from a video source",
+  "type": "array",
+  "items": {
+    "description": "A list of events extracted from the video source",
+    "type": "object",
+    "minItems": 0,
+    "uniqueItems": true,
+    "properties": {
+      "event_type" : {
+        "description": "the type of the event",
+        "type": "integer"
+      },
+      "event_description": {
+        "description": "a human readable description of the event",
+        "type": "string"
+      },
+      "start_frame_index": {
+        "description": "the frame index of the first frame of the event",
+        "type": "integer",
+        "minimum": 0
+      },
+      "end_frame_index":{
+		"description": "the frame index of the last frame of the event",
+        "type": "integer",
+        "minimum": 0
+      },
+      "start_time": {
+        "description": "the elapsed duration in seconds between the first frame of the video source and the start_frame_index",
+        "minimum": 0,
+        "$ref": "#/$defs/duration"
+      },
+      "end_time":{
+        "description": "the elapsed duration in seconds between the first frame of the video source and the start_frame_index",
+        "minimum": 0,
+        "$ref": "#/$defs/duration"
+      }
+    },
+    "if": {
+      "properties": { "eventType": { "const": 0 } }
+    },
+    "then": {
+      "properties": { 
+        "description": { "const": "Harsh Acceleration" },
+        "event_payload": {
+          "type": "object",
+          "properties": {
+            "start_speed": {
+              "description": "The speed recorded in the start_frame_index frame.",
+              "$ref": "#/$defs/nanNumber"
+            },
+            "max_speed": {
+              "description": "The maxiumum speed recorded between start_frame_index and stop_frame_index.",
+              "$ref": "#/$defs/nanNumber"
+            },
+            "average_speed": {
+              "description": "The mean average speed recorded between start_frame_index and stop_frame_index.",
+              "$ref": "#/$defs/nanNumber"
+            },
+            "latitude": {
+              "description": "The lattitude recorded at start_frame_index.",
+              "type": "number",
+              "minimum": -90,
+              "maxiumum": 90
+            },
+            "longitude": {
+              "description": "The longitude recorded at start_frame_index.",
+              "type": "number",
+              "minimum": -180,
+              "maxiumum": 180
+            },
+            "peak_g_force": {
+              "description": "The peak peak acceleration (in m/s^2) recorded between start_frame_index and stop_frame_index.",
+              "type": "number"
+            }
+          },
+          "required": ["start_speed", "max_speed", "average_speed", "latitude", "longitude", "peak_g_force"]
+        } 
+      },
+      "required": ["event_payload"]
+    }
+  },
+  "$defs": {
+    "duration": {
+      "type": "string",
+      "pattern": "^[0-9]{2,}:[0-9]{1,2}\\.[0-9]*$"
+    },
+    "nanNumber": {
+      "anyOf": [
+      	{ "type": "number" },
+      	{ "type": "string", "const": "NaN"}
+      ]
+    }
+  }
+}
